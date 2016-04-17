@@ -1,13 +1,183 @@
 package com.example.dexter.daycast;
 
+import android.content.Context;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-
+    Context context;
+    TextView city , lastTime, cur_Temp ,other_details;
+    WeatherItem weatherItem ;
+    ProgressBar progressBar;
+    SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = MainActivity.this;
+        findIds();
+        getFromDb();
+        if(weatherItem == null){
+            loadFirstTime();
+        }
+        else{
+            refreshData(weatherItem);
+        }
+
     }
+
+    private void loadFirstTime() {
+        if (new CheckInternetConnection(context).isConnectedToInternet()) {
+            progressBar.setVisibility(View.VISIBLE);
+            loadDataFromServer();
+        } else {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(context, "Check Internet Connectivity!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getFromDb() {
+        DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
+        weatherItem = dbInteraction.getItem();
+        dbInteraction.close();
+    }
+
+    public void findIds(){
+        city = (TextView)findViewById(R.id.city_field);
+        lastTime = (TextView)findViewById(R.id.updated_field);
+        cur_Temp = (TextView)findViewById(R.id.current_temperature);
+        other_details = (TextView)findViewById(R.id.details_field);
+    }
+    public void refreshData(WeatherItem result) {
+        progressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setVisibility(View.VISIBLE);
+    }
+
+
+
+    /**
+     * Call REST API to fetch data
+     */
+    private void loadDataFromServer() {
+
+        //Tag to identify your request
+        String tag_string_req = "fetch_item";
+
+        //Request String with Request TYPE
+        StringRequest strReq = new StringRequest(Request.Method.GET,
+                Config.BASIC_URL+"jaipur"+Config.API_ID, new Response.Listener<String>() {
+
+            //When any response is received
+            @Override
+            public void onResponse(String response) {
+                WeatherItem weatherItemLayout = new WeatherItem();
+                try {
+                    DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
+                    JSONObject jsonObject = new JSONObject(response);
+                    String number = jsonObject.getString("number");
+                    JSONArray categories = jsonObject.getJSONArray("categories");
+                    for (int i = 0; i < Integer.parseInt(number); i++) {
+                        JSONObject temp = categories.getJSONObject(i);
+                        String id = temp.getString("id");
+                        String name = temp.getString("name");
+                        String coverURL = temp.getString("coverURL");
+                        //Add data to local DB
+                      //  dbInteraction.insertItem(new WeatherItem(id, name, coverURL));
+                      // weatherItemLayout= new WeatherItem(id, name, coverURL));
+                    }
+                    refreshData(weatherItemLayout);
+                    dbInteraction.close();
+                    //If user pulled to refresh then set it to normal state
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        Toast.makeText(context, "Data Updated!", Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+
+
+                } catch (Exception e) {
+                    Toast.makeText(context, "Network error!", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                String json = null;
+
+                NetworkResponse response = error.networkResponse;
+                if (response != null && response.data != null) {
+
+                    json = new String(response.data);
+                    json = trimMessage(json, "message");
+                    if (json != null) displayMessage(json);
+
+
+                }
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting parameters if necessary
+                Map<String, String> params = new HashMap<String, String>();
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    public String trimMessage(String json, String key) {
+        String trimmedString = null;
+
+        try {
+            JSONObject obj = new JSONObject(json);
+            trimmedString = obj.getString(key);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return trimmedString;
+    }
+
+    public void displayMessage(String toastString) {
+        Toast.makeText(context, toastString, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * When pull to refresh is called
+     */
+    public void onRefresh() {
+        if (new CheckInternetConnection(context).isConnectedToInternet())
+            loadDataFromServer();
+        else {
+            Toast.makeText(context, "Check Internet Connectivity!", Toast.LENGTH_SHORT).show();
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
 }
