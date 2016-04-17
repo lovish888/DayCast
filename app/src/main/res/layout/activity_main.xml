@@ -65,6 +65,13 @@
         android:layout_centerHorizontal="true"
         android:text="Humidity"
         />
+            <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recommended : "
+            android:id="@+id/tvrecommend"/>
         </LinearLayout>
+
 </android.support.v4.widget.SwipeRefreshLayout>
+
 </RelativeLayout>

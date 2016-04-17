@@ -36,7 +36,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     Context context;
-    TextView city ,condition, cur_Temp ,other_details;
+    TextView city ,condition, cur_Temp ,other_details , recommend;
     WeatherItem weatherItem ;
     ProgressBar progressBar;
     String city_selected ;
@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         other_details = (TextView)findViewById(R.id.details_field);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         icon = (ImageView)findViewById(R.id.weather_icon);
+        recommend = (TextView)findViewById(R.id.tvrecommend);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(MainActivity.this);
     }
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }else{
                 icon.setImageResource(R.drawable.ic_cloudy_day);
             }
+            recommend.setText(R.string.cloud);
         }
         else if(c.equals("Clear")){
             if(hour > 18){
@@ -120,10 +122,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }else{
                 icon.setImageResource(R.drawable.ic_sun);
             }
+            recommend.setText(R.string.clear_day);
 
         }
         else if(c.equalsIgnoreCase("Rain")){
                 icon.setImageResource(R.drawable.ic_rain);
+            recommend.setText(R.string.rain);
         }
         else{
             if(hour > 18){
@@ -131,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }else{
                 icon.setImageResource(R.drawable.ic_sun);
             }
+            recommend.setText(R.string.clear_day);
 
         }
         progressBar.setVisibility(View.GONE);

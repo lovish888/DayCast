@@ -9,4 +9,8 @@
         <item>Banglore</item>
         <item>Chennai</item>
     </string-array>
+    <string name="cloud">You can go for a Picnic </string>
+    <string name="rain">Please carry your umbrella if you are going Outside</string>
+    <string name="clear_day">Climate is Clear</string>
+    <string name="clear_night">Climate is Clear</string>
 </resources>
