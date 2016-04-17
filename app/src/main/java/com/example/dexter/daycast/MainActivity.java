@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     Context context;
     TextView city , lastTime, cur_Temp ,other_details;
     WeatherItem weatherItem ;
@@ -41,8 +42,12 @@ public class MainActivity extends AppCompatActivity {
             loadFirstTime();
         }
         else{
+            System.out.println(weatherItem.getCity_name());
+            System.out.println(weatherItem.getHumiditylevel());
+            System.out.println(weatherItem.getCity_temp());
             refreshData(weatherItem);
         }
+        loadFirstTime();
 
     }
 
@@ -59,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private void getFromDb() {
         DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
         weatherItem = dbInteraction.getItem();
+
         dbInteraction.close();
     }
 
@@ -67,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         lastTime = (TextView)findViewById(R.id.updated_field);
         cur_Temp = (TextView)findViewById(R.id.current_temperature);
         other_details = (TextView)findViewById(R.id.details_field);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(MainActivity.this);
     }
     public void refreshData(WeatherItem result) {
         progressBar.setVisibility(View.GONE);
@@ -94,27 +103,30 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
                     JSONObject jsonObject = new JSONObject(response);
-                    String number = jsonObject.getString("number");
-                    JSONArray categories = jsonObject.getJSONArray("categories");
-                    for (int i = 0; i < Integer.parseInt(number); i++) {
-                        JSONObject temp = categories.getJSONObject(i);
-                        String id = temp.getString("id");
-                        String name = temp.getString("name");
-                        String coverURL = temp.getString("coverURL");
-                        //Add data to local DB
-                      //  dbInteraction.insertItem(new WeatherItem(id, name, coverURL));
-                      // weatherItemLayout= new WeatherItem(id, name, coverURL));
-                    }
+                    JSONArray jsonarray = jsonObject.getJSONArray("weather");
+                    JSONObject jsonObject1 = jsonarray.getJSONObject(0);
+                    String Climate = jsonObject1.getString("main");
+                    String city = "jaipur";
+                    JSONObject jsonObject2 = jsonObject.getJSONObject("main");
+                    String temp = jsonObject2.getString("temp");
+                    String humidity = jsonObject2.getString("humidity");
+                    Log.d("CITY",city);
+                    Log.d("Temperature",temp);
+                    Log.d("Humidity",humidity);
+                    Log.d("Climate",Climate);
                     refreshData(weatherItemLayout);
+                    dbInteraction.insertItem(new WeatherItem("123", city, temp, humidity));
                     dbInteraction.close();
                     //If user pulled to refresh then set it to normal state
                     if (swipeRefreshLayout.isRefreshing()) {
                         Toast.makeText(context, "Data Updated!", Toast.LENGTH_SHORT).show();
                         swipeRefreshLayout.setRefreshing(false);
                     }
-
+                    progressBar.setVisibility(View.GONE);
 
                 } catch (Exception e) {
+                    progressBar.setVisibility(View.GONE);
+                    Log.e("Exception", String.valueOf(e));
                     Toast.makeText(context, "Network error!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -145,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         };
-
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }

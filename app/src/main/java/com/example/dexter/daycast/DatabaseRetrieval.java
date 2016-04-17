@@ -19,7 +19,7 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
     private String FIELD_TABLE_ITEM_CITY_ID = "city_id";
     private String FIELD_TABLE_ITEM_CITY_NAME = "city_name";
     private String FIELD_TABLE_ITEM_CITY_TEMP = "city_temp";
-    private String FIELD_TABLE_ITEM_HUMIDITY_LEVEL = "humiditylevel" ;
+    private String FIELD_TABLE_ITEM_HUMIDITY_LEVEL = "humidity_level" ;
 
 
     public DatabaseRetrieval(Context context) {
@@ -75,7 +75,10 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
         WeatherItem weatherItem = null;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("select * from "
-                + TABLE_ITEM + "where city_name =  jaipur "  + ";", null);
+                + TABLE_ITEM + " where city_name =  \"jaipur\" "  + ";", null);
+        if(cursor==null){
+            System.out.println("Cursor is null");
+        }
         if (cursor != null & cursor.getColumnCount() > 0) {
             cursor.moveToFirst();
             for (int i = 0; i < cursor.getCount(); i++) {
@@ -88,11 +91,11 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
                         .getColumnIndex(FIELD_TABLE_ITEM_CITY_TEMP));
                 String city_humidity = cursor.getString(cursor
                         .getColumnIndex(FIELD_TABLE_ITEM_HUMIDITY_LEVEL));
-
+                System.out.println("DATABASE");
               weatherItem = new WeatherItem(city_id,city_name,city_temp,city_humidity);
+                return weatherItem;
 
-
-                cursor.moveToNext();
+//                cursor.moveToNext();
             }
             cursor.close();
             return weatherItem;
