@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#3F51B5">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Seclect City"
+        android:id="@+id/city_select"
+        android:paddingLeft="120dp"
+        android:textSize="18dp"
+        android:onClick="onClick" />
+
+</android.support.v7.widget.Toolbar>
