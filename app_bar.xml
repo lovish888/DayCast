@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#3F51B5">
+<ImageView
+    android:layout_width="35dp"
+    android:layout_height="35dp"
+    android:background="@drawable/logo" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select City"
+        android:id="@+id/city_select"
+        android:paddingLeft="15dp"
+        android:textSize="18dp"
+        android:onClick="onClick" />
+
+    <EditText
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/city_search"
+        android:textSize="18dp"
+        android:paddingLeft="5dp"
+        android:background="#c0e0f4"
+        android:singleLine="true"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:onClick="searchButton"
+        android:id="@+id/searchButton" />
+</android.support.v7.widget.Toolbar>
