@@ -1,13 +1,19 @@
 package com.example.dexter.daycast;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,10 +42,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     String city_selected ;
     ImageView icon;
     SwipeRefreshLayout swipeRefreshLayout;
+    Toolbar toolbar ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
         SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         city_selected = pref.getString("city","jaipur");
@@ -71,8 +80,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void getFromDb() {
         DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context,city_selected);
+        SQLiteDatabase db = dbInteraction.getWritableDatabase();
+        if(!dbInteraction.isTableExists(db,"Weather_app"))
+        dbInteraction.onCreate(db);
         weatherItem = dbInteraction.getItem();
-
         dbInteraction.close();
     }
 
@@ -132,13 +143,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * Call REST API to fetch data
      */
     private void loadDataFromServer() {
-
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        city_selected = pref.getString("city","jaipur");
+        Log.d("City selected",city_selected);
         //Tag to identify your request
         String tag_string_req = "fetch_item";
 
         //Request String with Request TYPE
         StringRequest strReq = new StringRequest(Request.Method.GET,
-                Config.BASIC_URL+"jaipur"+Config.API_ID, new Response.Listener<String>() {
+                Config.BASIC_URL+city_selected+Config.API_ID, new Response.Listener<String>() {
 
             //When any response is received
             @Override
@@ -234,6 +248,45 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             Toast.makeText(context, "Check Internet Connectivity!", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
         }
+    }
+    public void onClick(View v) {
+        //set up dialog
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.activity_city_select_dailog);
+        ListView listview = (ListView) dialog.findViewById(R.id.listView);
+        dialog.setTitle("Select City");
+        String[] cityList = getResources().getStringArray(R.array.cityList);
+        ArrayAdapter<String> adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,cityList);
+        listview.setAdapter(adapter);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                switch (position) {
+                    case 0:
+                        editor.putString("city", "jaipur");
+                       Log.e("button", pref.getString("city",null));
+                        break;
+                    case 1:
+                        editor.putString("city", "mumbai");
+                        break;
+                    case 2:
+                        editor.putString("city", "delhi");
+                        break;
+                    case 3:
+                        editor.putString("city", "banglore");
+                        break;
+                    case 4:
+                        editor.putString("city", "chennai");
+                        break;
+
+                }
+                editor.commit();
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
 }

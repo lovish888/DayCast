@@ -13,7 +13,7 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
     private static String DATABASE_NAME = "hackathon.db";
 
     // Tables
-    private String TABLE_ITEM = "Weather";
+    private String TABLE_ITEM = "Weather_app";
     private String city_selected ;
     //TABLE ITEM
     private String FIELD_TABLE_ITEM_CITY_ID = "city_id";
@@ -32,8 +32,8 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // TODO Auto-generated method stub
         db.execSQL(
-                "create table weather " +
-                        "(city_id int unique,city_name text,city_temp text,humidity_level text)"
+                "create table Weather_app " +
+                        "(city_id text ,city_name text,city_temp text,humidity_level text)"
         );
 
 
@@ -42,7 +42,7 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // TODO Auto-generated method stub
-        db.execSQL("DROP TABLE IF EXISTS weather");
+        db.execSQL("DROP TABLE IF EXISTS Weather_app");
         onCreate(db);
     }
 
@@ -117,6 +117,21 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
             return false;
         }
         return true;
+    }
+    boolean isTableExists(SQLiteDatabase db, String tableName)
+    {
+        if (tableName == null || db == null || !db.isOpen())
+        {
+            return false;
+        }
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?", new String[] {"table", tableName});
+        if (!cursor.moveToFirst())
+        {
+            return false;
+        }
+        int count = cursor.getInt(0);
+        cursor.close();
+        return count > 0;
     }
 
 
