@@ -1,17 +1,13 @@
 package com.example.dexter.daycast;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,13 +36,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     String city_selected ;
     ImageView icon;
     SwipeRefreshLayout swipeRefreshLayout;
-    Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar = (Toolbar) findViewById(R.id.app_bar);
-        setSupportActionBar(toolbar);
         SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         city_selected = pref.getString("city","jaipur");
@@ -127,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }else{
                 icon.setImageResource(R.drawable.ic_sun);
             }
+
         }
         progressBar.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -240,18 +234,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             Toast.makeText(context, "Check Internet Connectivity!", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
         }
-    }
-
-    public void onClick(View v) {
-        //set up dialog
-        Dialog dialog = new Dialog(MainActivity.this);
-        dialog.setContentView(R.layout.activity_city_select_dailog);
-        ListView listview = (ListView) dialog.findViewById(R.id.listView);
-        dialog.setTitle("Select City");
-        String[] cityList = getResources().getStringArray(R.array.cityList);
-        ArrayAdapter<String> adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,cityList);
-        listview.setAdapter(adapter);
-        dialog.show();
     }
 
 }
