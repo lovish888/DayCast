@@ -14,7 +14,7 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
 
     // Tables
     private String TABLE_ITEM = "Weather";
-
+    private String city_selected ;
     //TABLE ITEM
     private String FIELD_TABLE_ITEM_CITY_ID = "city_id";
     private String FIELD_TABLE_ITEM_CITY_NAME = "city_name";
@@ -22,8 +22,9 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
     private String FIELD_TABLE_ITEM_HUMIDITY_LEVEL = "humidity_level" ;
 
 
-    public DatabaseRetrieval(Context context) {
+    public DatabaseRetrieval(Context context , String city_selected) {
         super(context, DATABASE_NAME, null, 1);
+        this.city_selected = city_selected;
     }
 
 
@@ -75,7 +76,7 @@ public class DatabaseRetrieval extends SQLiteOpenHelper {
         WeatherItem weatherItem = null;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("select * from "
-                + TABLE_ITEM + " where city_name =  \"jaipur\" "  + ";", null);
+                + TABLE_ITEM + " where city_name =  \""+city_selected +"\""  + ";", null);
         if(cursor==null){
             System.out.println("Cursor is null");
         }

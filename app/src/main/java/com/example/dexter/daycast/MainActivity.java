@@ -1,11 +1,13 @@
 package com.example.dexter.daycast;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,19 +24,25 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     Context context;
-    TextView city , lastTime, cur_Temp ,other_details;
+    TextView city ,condition, cur_Temp ,other_details;
     WeatherItem weatherItem ;
     ProgressBar progressBar;
+    String city_selected ;
+    ImageView icon;
     SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        city_selected = pref.getString("city","jaipur");
         context = MainActivity.this;
         findIds();
         getFromDb();
@@ -62,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     private void getFromDb() {
-        DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
+        DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context,city_selected);
         weatherItem = dbInteraction.getItem();
 
         dbInteraction.close();
@@ -70,14 +78,45 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     public void findIds(){
         city = (TextView)findViewById(R.id.city_field);
-        lastTime = (TextView)findViewById(R.id.updated_field);
+        condition = (TextView)findViewById(R.id.updated_field);
         cur_Temp = (TextView)findViewById(R.id.current_temperature);
         other_details = (TextView)findViewById(R.id.details_field);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        icon = (ImageView)findViewById(R.id.weather_icon);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(MainActivity.this);
     }
     public void refreshData(WeatherItem result) {
+        city.setText("City : "+result.getCity_name());
+        float kelvin = Float.parseFloat(result.getCity_temp());
+        int celsius = (int) (kelvin - 273);
+        cur_Temp.setText("Temperature : " + String.valueOf(celsius) + " C");
+        other_details.setText("Humidity : "+ result.getHumiditylevel());
+        condition.setText("Climate : "+result.getCity_id());
+        String c = result.getCity_id();
+        Calendar cal = Calendar.getInstance();
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        if(c.equalsIgnoreCase("Clouds")){
+            if(hour > 18){
+                    icon.setImageResource(R.drawable.ic_cloudy_night);
+            }else{
+                icon.setImageResource(R.drawable.ic_cloudy_day);
+            }
+        }
+        else if(c.equals("Clear")){
+            if(hour > 18){
+                icon.setImageResource(R.drawable.ic_moon);
+            }else{
+                icon.setImageResource(R.drawable.ic_sun);
+            }
+
+        }
+        else if(c.equalsIgnoreCase("Rain")){
+                icon.setImageResource(R.drawable.ic_rain);
+        }
+        else{
+
+        }
         progressBar.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
     }
@@ -101,12 +140,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             public void onResponse(String response) {
                 WeatherItem weatherItemLayout = new WeatherItem();
                 try {
-                    DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context);
+                    DatabaseRetrieval dbInteraction = new DatabaseRetrieval(context,city_selected);
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray jsonarray = jsonObject.getJSONArray("weather");
                     JSONObject jsonObject1 = jsonarray.getJSONObject(0);
                     String Climate = jsonObject1.getString("main");
-                    String city = "jaipur";
+                    String city = city_selected;
                     JSONObject jsonObject2 = jsonObject.getJSONObject("main");
                     String temp = jsonObject2.getString("temp");
                     String humidity = jsonObject2.getString("humidity");
@@ -114,8 +153,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     Log.d("Temperature",temp);
                     Log.d("Humidity",humidity);
                     Log.d("Climate",Climate);
+                    weatherItemLayout = new WeatherItem(Climate, city, temp, humidity);
                     refreshData(weatherItemLayout);
-                    dbInteraction.insertItem(new WeatherItem("123", city, temp, humidity));
+                    dbInteraction.insertItem(new WeatherItem(Climate, city, temp, humidity));
                     dbInteraction.close();
                     //If user pulled to refresh then set it to normal state
                     if (swipeRefreshLayout.isRefreshing()) {
