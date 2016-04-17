@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             if(hour > 18){
                 icon.setImageResource(R.drawable.ic_moon);
             }else{
-                icon.setImageResource(R.drawable.ic_moon);
+                icon.setImageResource(R.drawable.ic_sun);
             }
 
         }
