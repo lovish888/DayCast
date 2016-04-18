@@ -9,8 +9,8 @@
         <item>Banglore</item>
         <item>Chennai</item>
     </string-array>
-    <string name="cloud">You can go for a Picnic </string>
-    <string name="rain">Please carry your umbrella if you are going Outside</string>
-    <string name="clear_day">Climate is Clear</string>
-    <string name="clear_night">Climate is Clear</string>
+    <string name="cloud">You can go for a Picnic, can play any sport you like. Dont prefer movies or long journey. </string>
+    <string name="rain">Please carry your umbrella if you are going outside. Good time to play football. Enjoy some hot drinks.</string>
+    <string name="clear_day"> Climate is clear, prefer going for movie and playing indoor games its too warm dont play outside.</string>
+    <string name="clear_night">Climate is Clear, Enjoy star gazing, can plan a roof top party.</string>
 </resources>
